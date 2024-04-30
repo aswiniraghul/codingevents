@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Controller
@@ -18,13 +19,18 @@ public class EventController {
 
     @GetMapping
     public String displayAllEvents(Model model) {
+        HashMap<String, String> events = new HashMap<>();
+        events.put("Coding", "A coding event");
+        events.put("More Coding", "Another coding event");
         model.addAttribute("events", events);
         return "events/index";
+
     }
 
     @GetMapping("create")
     public String displayCreateEventForm() {
         return "events/create";
+
     }
 
     @PostMapping("create")
