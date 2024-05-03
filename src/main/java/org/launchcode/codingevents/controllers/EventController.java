@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Created by Chris Bay
+ */
 @Controller
 @RequestMapping("events")
 public class EventController {
@@ -32,8 +34,9 @@ public class EventController {
     }
 
     @PostMapping("create")
-    public String processCreateEventForm(@RequestParam String eventName) {
-        events.add(new Event(eventName));
+    public String processCreateEventForm(@RequestParam String eventName,
+                                         @RequestParam String eventDescription) {
+        events.add(new Event(eventName, eventDescription));
         return "redirect:/events";
     }
 
