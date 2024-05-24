@@ -13,38 +13,30 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("eventCategories")
+@RequestMapping("/event-categories")
 public class EventCategoryController {
 
     @Autowired
     private EventCategoryRepository eventCategoryRepository;
 
     @GetMapping
-    public String displayAllCategories(Model model) {
-        model.addAttribute("title", "All Categories");
+    public String displayCategories(Model model) {
         model.addAttribute("categories", eventCategoryRepository.findAll());
         return "eventCategories/index";
     }
 
-    @GetMapping("create")
-    public String renderCreateEventCategoryForm(Model model) {
-        model.addAttribute("title", "Create Category");
-        model.addAttribute("eventCategory", new EventCategory());
+    @GetMapping("/create")
+    public String displayCreateEventCategoryForm(Model model) {
+        model.addAttribute("category", new EventCategory());
         return "eventCategories/create";
     }
 
-    @PostMapping("create")
-    public String processCreateEventCategoryForm(@Valid @ModelAttribute EventCategory eventCategory, Errors errors, Model model) {
-
+    @PostMapping("/create")
+    public String processCreateEventCategoryForm(@ModelAttribute @Valid EventCategory category, Errors errors) {
         if (errors.hasErrors()) {
-            model.addAttribute("title", "Create Category");
-            model.addAttribute(new EventCategory());
-            return "eventCategories/create";
+            return "/create";
         }
-
-        eventCategoryRepository.save(eventCategory);
-        return "redirect:";
+        eventCategoryRepository.save(category);
+        return "redirect:/event-categories";
     }
-
-
 }
