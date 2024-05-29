@@ -1,41 +1,38 @@
 package org.launchcode.codingevents.models;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-
-import jakarta.validation.Valid;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-
-import java.util.Objects;
-
 @Entity
-public class Event extends AbstractEntity {
+public class Event extends AbstractEntity  {
 
-    @Size(min=3, max=50, message="Name must be 3-50 characters.")
-    @NotBlank(message="Name is required.")
+    @NotBlank(message = "Name is required")
+    @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
     private String name;
 
-    @Size(max=500, message="Description must be no more than 500 characters.")
+    @Size(max = 500, message = "Description too long!")
     private String description;
 
-    @Email(message="Email must be a valid format.")
-    @NotBlank(message="Email is required.")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email. Try again.")
     private String contactEmail;
 
-    private EventType type;
+    @ManyToOne
+    @NotNull(message = "Category is required")
+    private EventCategory eventCategory;
 
-    public Event() {}
-
-    public Event(String name, String description, String contactEmail, EventType type) {
+    public Event(String name, String description, String contactEmail, EventCategory eventCategory) {
         this.name = name;
         this.description = description;
         this.contactEmail = contactEmail;
-        this.type = type;
+        this.eventCategory = eventCategory;
     }
+
+    public Event() {}
 
     public String getName() {
         return name;
@@ -60,12 +57,13 @@ public class Event extends AbstractEntity {
     public void setContactEmail(String contactEmail) {
         this.contactEmail = contactEmail;
     }
-    public EventType getType() {
-        return type;
+
+    public EventCategory getEventCategory() {
+        return eventCategory;
     }
 
-    public void setType(EventType type) {
-        this.type = type;
+    public void setEventCategory(EventCategory eventCategory) {
+        this.eventCategory = eventCategory;
     }
 
     @Override

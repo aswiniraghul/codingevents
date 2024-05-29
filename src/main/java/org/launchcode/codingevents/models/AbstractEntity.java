@@ -20,8 +20,7 @@ public abstract class AbstractEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (o == null || getClass() != o.getClass()) return false;
         AbstractEntity entity = (AbstractEntity) o;
         return id == entity.id;
     }
