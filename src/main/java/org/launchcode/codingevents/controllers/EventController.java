@@ -12,7 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import java.util.Optional;
 
-
 @Controller
 @RequestMapping("events")
 public class EventController {
