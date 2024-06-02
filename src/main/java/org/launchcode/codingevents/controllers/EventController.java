@@ -1,94 +1,101 @@
 package org.launchcode.codingevents.controllers;
 
-
-
 import jakarta.validation.Valid;
+import org.launchcode.codingevents.data.EventCategoryRepository;
 import org.launchcode.codingevents.data.EventRepository;
 import org.launchcode.codingevents.models.Event;
-import org.launchcode.codingevents.models.EventType;
+import org.launchcode.codingevents.models.EventCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/events")
+@RequestMapping("events")
 public class EventController {
-
 
     @Autowired
     private EventRepository eventRepository;
 
+    @Autowired
+    private EventCategoryRepository eventCategoryRepository;
+
     @GetMapping
-    public String displayAllEvents(Model model) {
-        model.addAttribute("events", eventRepository.findAll());
+    public String displayEvents(@RequestParam(required = false) Integer categoryId, Model model) {
+
+        if (categoryId == null) {
+            model.addAttribute("title", "All Events");
+            model.addAttribute("events", eventRepository.findAll());
+        } else {
+            Optional<EventCategory> result = eventCategoryRepository.findById(categoryId);
+            if (result.isEmpty()) {
+                model.addAttribute("title", "Invalid Category ID: " + categoryId);
+            } else {
+                EventCategory category = result.get();
+                model.addAttribute("title", "Events in category: " + category.getName());
+                model.addAttribute("events", category.getEvents());
+            }
+        }
+
         return "events/index";
     }
 
-
-    @GetMapping("/create")
+    @GetMapping("create")
     public String displayCreateEventForm(Model model) {
-        model.addAttribute("event", new Event());
-        model.addAttribute("types", EventType.values());
+        model.addAttribute("title", "Create Event");
+        model.addAttribute(new Event());
+        model.addAttribute("categories", eventCategoryRepository.findAll());
         return "events/create";
     }
 
-
-    @PostMapping("/create")
-    public String processCreateEventForm(@ModelAttribute @Valid Event newEvent, Errors errors, Model model) {
-        if (errors.hasErrors()) {
-            model.addAttribute("types", EventType.values());
+    @PostMapping("create")
+    public String processCreateEventForm(@ModelAttribute @Valid Event newEvent,
+                                         Errors errors, Model model) {
+        if(errors.hasErrors()) {
+            model.addAttribute("title", "Create Event");
             return "events/create";
         }
+
         eventRepository.save(newEvent);
         return "redirect:/events";
     }
 
-
-    @GetMapping("/delete")
+    @GetMapping("delete")
     public String displayDeleteEventForm(Model model) {
+        model.addAttribute("title", "Delete Events");
         model.addAttribute("events", eventRepository.findAll());
         return "events/delete";
     }
 
-    // Processes form submitted at http://localhost:8080/events/delete
-    @PostMapping("/delete")
-    public String processDeleteEventForm(@RequestParam(required = false) int[] eventIds) {
+    @PostMapping("delete")
+    public String processDeleteEventsForm(@RequestParam(required = false) int[] eventIds) {
+
         if (eventIds != null) {
             for (int id : eventIds) {
                 eventRepository.deleteById(id);
             }
         }
+
         return "redirect:/events";
     }
 
-    // Renders http://localhost:8080/events/edit/{id}
-    @GetMapping("/edit/{eventId}")
-    public String displayEditEventForm(Model model, @PathVariable int eventId) {
-        // Don't worry about this Optional syntax until chapter 18.3
-        Optional<Event> eventWrapper = eventRepository.findById(eventId);
-        if (eventWrapper.isPresent()) {
-            Event event = eventWrapper.get();
+    @GetMapping("detail")
+    public String displayEventDetails(@RequestParam Integer eventId, Model model) {
+
+        Optional<Event> result = eventRepository.findById(eventId);
+
+        if (result.isEmpty()) {
+            model.addAttribute("title", "Invalid Event ID: " + eventId);
+        } else {
+            Event event = result.get();
+            model.addAttribute("title", event.getName() + " Details");
             model.addAttribute("event", event);
-            return "events/edit";
         }
-        return "events/index";
+
+        return "events/detail";
     }
 
-    @PostMapping("/edit")
-    public String processEditEventForm(int eventId, String name, String description, String contactEmail) {
-        // Don't worry about this Optional syntax until chapter 18.3
-        Optional<Event> eventWrapper = eventRepository.findById(eventId);
-        if (eventWrapper.isPresent()) {
-            Event event = eventWrapper.get();
-            event.setName(name);
-            event.setDescription(description);
-            event.setContactEmail(contactEmail);
-            eventRepository.save(event);
-        }
-        return "redirect:/events";
-    }
 }
